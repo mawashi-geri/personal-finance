@@ -1,0 +1,23 @@
+[project]
+name = "personal_finance"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "mawashi-geri",email = "mikeestermann@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "ipython (>=9.9.0,<10.0.0)",
+    "polars (>=1.37.1,<2.0.0)",
+    "pytest (>=9.0.2,<10.0.0)",
+    "python-dotenv (>=1.2.1,<2.0.0)",
+    "pyyaml (>=6.0.3,<7.0.0)",
+]
+
+[tool.poetry]
+packages = [{include = "personal_finance", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
