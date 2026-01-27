@@ -1,8 +1,40 @@
 from dataclasses import dataclass
+from enum import StrEnum
 import os
 from pathlib import Path
 from typing import Any
 import yaml
+
+from dotenv import load_dotenv
+
+
+from personal_finance.configuration.log_config import get_logger
+
+
+logger = get_logger(name=__name__)
+
+
+LIVE: str = "live"
+DEV: str = "dev"
+TEST: str = "test"
+
+
+class EnvName(StrEnum):
+    LIVE = "live"
+    DEV = "dev"
+    TEST = "test"
+
+
+def load_env(env_name: EnvName) -> None:
+    env_file_path = (
+        Path(__file__).parent / 
+        ".." / ".." / ".." / "env_files" /
+        f".env.{env_name.value}"
+    )
+
+    logger.info(f"Loading environment variables from: {env_file_path.resolve()}")
+
+    load_dotenv(dotenv_path=env_file_path)
 
 
 def resolve_data_root_path_from_env():
@@ -23,7 +55,7 @@ class DepositAccountDataConfig:
             root_dir=d[list(d.keys())[0]]["root_dir"],
             sub_dirs=d[list(d.keys())[0]]["sub_dirs"],
         )
-
+    
 
 @dataclass
 class DataConfig:
@@ -43,9 +75,7 @@ class DataConfig:
 
         return DataConfig(
             data=[
-                DepositAccountDataConfig.from_dict(
-                    {k: v}
-                )
+                DepositAccountDataConfig.from_dict({k: v})
                 for k, v in config["deposit_accounts"]["data"].items()
             ],
         )
