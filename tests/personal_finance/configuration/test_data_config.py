@@ -12,6 +12,6 @@ def test_data_config():
 
     data_config = DataConfig.from_yaml(data_root_path=data_root_path)
 
-    print(json.dumps(asdict(data_config)))
+    print(data_config)
 
     assert data_config

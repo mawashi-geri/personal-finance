@@ -1,5 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from enum import StrEnum
+import json
 import os
 from pathlib import Path
 from typing import Any
@@ -59,7 +60,8 @@ class DepositAccountDataConfig:
 
 @dataclass
 class DataConfig:
-    data: list[DepositAccountDataConfig]
+    root_path: Path
+    deposit_accounts: list[DepositAccountDataConfig]
 
     @staticmethod
     def from_yaml(data_root_path: str = None):
@@ -74,8 +76,16 @@ class DataConfig:
         config = yaml.safe_load(config_path.open("r"))
 
         return DataConfig(
-            data=[
+            root_path=Path(data_root_path),
+            deposit_accounts=[
                 DepositAccountDataConfig.from_dict({k: v})
                 for k, v in config["deposit_accounts"]["data"].items()
             ],
         )
+
+
+if __name__ == "__main__":
+    load_env(EnvName.LIVE)
+    data_config = DataConfig.from_yaml()
+    # print(json.dumps(asdict(data_config), indent=4))
+    print(data_config)
