@@ -1,47 +1,22 @@
-from typing import TypeVar, Generic
-
-import pandas as pd
 import polars as pl
+import csv
 
+def read_csv_file(file_path: str) -> list[dict]:
+    i = 0
+    with open(file_path, mode='r', newline='', encoding='utf-8') as reader:
+        for row in reader:
+            i += 1
+            print(i)
+            data = next(reader)
+            print(data)
+    return data
 
-T = TypeVar('T')
+def main():
+    file_path = '/Users/mike/Documents/Mike/Finance/Banking/Barclays/Data/tax years/2023-24/2023-24 tax year 90186236.csv'  # Replace with your CSV file path
+    # file_path = '/Users/mike/Documents/Mike/Finance/Banking/Barclays/Data/tax years/2023-24/data.csv'  # Replace with your CSV file path
+    data = read_csv_file(file_path)
+    df = pl.read_csv(file_path)
+    print(df)
 
-
-class Container(Generic[T]):
-    def __init__(self, value: T) -> None:
-        self.value = value
-    
-    def get(self) -> T:
-        return self.value
-    
-    def set(self, value: T) -> None:
-        self.value = value
-
-
-# Usage examples
-int_container = Container[int](42)
-print(int_container.get())
-
-str_container = Container[str]("Hello")
-print(str_container.get())
-
-
-class PandasContainer(Container[pd.DataFrame ]):
-    pass
-
-
-class PolarsContainer(Container[pl.DataFrame ]):
-    pass
-
-class ContainerX(PolarsContainer):
-    pass
-
-polars_container = PolarsContainer(pl.DataFrame({"column1": [1, 2, 3], "column2": ["a", "b", "c"]}))
-print(polars_container.get())
-
-pandas_container = PandasContainer(pd.DataFrame({"column1": [4, 5, 6], "column2": ["d", "e", "f"]}))
-print(pandas_container.get())
-
-
-container_x = ContainerX(pl.DataFrame({"columnX": [7, 8, 9], "columnY": ["g", "h", "i"]}))
-print(container_x.get())
+if __name__ == "__main__":
+    main()

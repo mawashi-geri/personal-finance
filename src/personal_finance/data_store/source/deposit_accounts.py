@@ -11,7 +11,7 @@ from personal_finance.configuration.data_config import (
     resolve_config_dir_from_env,
     resolve_data_root_dir_from_env,
 )
-from personal_finance.model.source.deposit_accounts import source_deposit_account_schemas
+from personal_finance.schemas.source.deposit_accounts import source_deposit_account_schemas
 from personal_finance.utils.utils import StrMixin, find_files_in_dir
 
 
@@ -45,14 +45,26 @@ class SourceDepositAccountDataStore(StrMixin):
             match path.suffix:
                 case ".xlsx":
                     def read_fn(path):
-                        return pl.read_excel(path, schema_overrides=self.schema)
+                        df = pl.read_excel(path, schema_overrides=self.schema)
+
+                        return df
                 case ".csv":
                     def read_fn(path):
-                        return pl.read_csv(path, schema=self.schema, truncate_ragged_lines=True)
+                        df = pl.read_csv(
+                            path, 
+                            # schema=self.schema, 
+                            truncate_ragged_lines=True,
+                        )
+
+                        return df
                 case _:
                     return path, None, ValueError(f"Unsupported file type: {path.suffix}")  
 
-            df = read_fn(path)
+            try:
+                df = (read_fn(path).with_columns(pl.lit(self.entity_name).alias("Entity")))
+
+            except Exception as e:
+                raise e
 
             return path, df, None
 
