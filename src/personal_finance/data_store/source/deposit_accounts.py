@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import polars as pl
-# import pandas as pd
 
 from personal_finance.configuration.data_config import (
     DataConfig,
@@ -12,13 +11,15 @@ from personal_finance.configuration.data_config import (
     resolve_config_dir_from_env,
     resolve_data_root_dir_from_env,
 )
+from personal_finance.model.source.deposit_accounts import source_deposit_account_schemas
 from personal_finance.utils.utils import StrMixin, find_files_in_dir
 
 
-class DepositAccountDataStore(StrMixin):
+class SourceDepositAccountDataStore(StrMixin):
     def __init__(self, deposit_account_data_config: DepositAccountDataConfig, entity_name: str):
         self.deposit_account_data_config = deposit_account_data_config
         self.entity_name = entity_name
+        self.schema = source_deposit_account_schemas[entity_name]
 
     def get_account_data_dir_paths(self) -> list[Path]:
         deposit_account_data_config = self.deposit_account_data_config
@@ -43,16 +44,17 @@ class DepositAccountDataStore(StrMixin):
         def _read_transactions_data_file(path: Path) -> pl.DataFrame:
             match path.suffix:
                 case ".xlsx":
-                    read_fn = lambda path: pl.read_excel(path)
+                    def read_fn(path):
+                        return pl.read_excel(path, schema_overrides=self.schema)
                 case ".csv":
-                    read_fn = lambda path: pl.read_csv(path, truncate_ragged_lines=True)
+                    def read_fn(path):
+                        return pl.read_csv(path, schema=self.schema, truncate_ragged_lines=True)
                 case _:
                     return path, None, ValueError(f"Unsupported file type: {path.suffix}")  
-            try:
-                df = read_fn(path)
-                return path, df, None
-            except Exception as e:
-                return path, None, e
+
+            df = read_fn(path)
+
+            return path, df, None
 
         paths = self.get_account_data_file_paths()
 
@@ -71,12 +73,12 @@ class DepositAccountDataStore(StrMixin):
 
 
 class SourceDataStore:
-    deposit_account_data_stores: dict[str, DepositAccountDataStore]
+    deposit_account_data_stores: dict[str, SourceDepositAccountDataStore]
 
     def __init__(self, data_config: DataConfig):
         self.data_config = data_config
         self.deposit_account_data_stores = {
-            name: DepositAccountDataStore(
+            name: SourceDepositAccountDataStore(
                 deposit_account_data_config=deposit_account_config,
                 entity_name=name,
             )
@@ -92,7 +94,7 @@ if __name__ == "__main__":
     data_config_dict = load_config_dict_from_yaml(config_path=data_config_path)
     data_config = DataConfig.from_dict(data_root_dir=data_root_dir, data_config_dict=data_config_dict)
 
-    barclays_deposit_accounts_data_store = DepositAccountDataStore(deposit_account_data_config=data_config.deposit_accounts['Barclays'], entity_name="Barclays")
+    barclays_deposit_accounts_data_store = SourceDepositAccountDataStore(deposit_account_data_config=data_config.deposit_accounts['Barclays'], entity_name="Barclays")
     transactions, errors = barclays_deposit_accounts_data_store.get_account_transactions()
 
     print(transactions)
