@@ -32,6 +32,7 @@ def transform_deposit_account_data(env_name: Optional[EnvName] = EnvName.LIVE) -
     ) in source_data_store.deposit_account_data_stores.items():
         transactions, errors = deposit_account_data_store.get_account_transactions()
         transformed_transactions = transform_functions[entity_name](transactions)
+
         print(f"Transformed transactions for entity {entity_name}:")
         print(transformed_transactions)
 
