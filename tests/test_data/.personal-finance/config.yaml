@@ -1,7 +1,12 @@
 deposit_accounts:
   data:
     Barclays:
-      root_dir: ../Banking/Barclays/Data
+      entity_dir: Banking/Barclays/Data
       sub_dirs:
         - "accounts"
-        - "tax_years"
+        - "tax years"
+    Skipton:
+      entity_dir: Banking/Skipton
+      sub_dirs:
+        - "Data"
+        - "Old Data"

@@ -1,17 +1,32 @@
-from dataclasses import asdict
-import json
-
 from personal_finance.configuration.data_config import (
     DataConfig,
-    resolve_data_root_path_from_env,
+    DepositAccountDataConfig,
 )
 
 
-def test_data_config():
-    data_root_path = resolve_data_root_path_from_env()
+def test_deposit_account_data_config():
+    expected = DepositAccountDataConfig(
+        root_dir="root_dir",
+        entity_name="TestAccount",
+        entity_dir="entity_dir",
+        sub_dirs=["subdir1", "subdir2"],
+    )
 
-    data_config = DataConfig.from_yaml(data_root_path=data_root_path)
+    actual = DepositAccountDataConfig.from_dict(
+        root_dir="root_dir",
+        entity_name="TestAccount",
+        d={
+            "entity_dir": "entity_dir",
+            "sub_dirs": ["subdir1", "subdir2"],
+        },
+    )
 
+    assert actual == expected
+
+
+def test_data_config(data_root_dir, data_config_dict):
+
+    data_config = DataConfig.from_dict(data_root_dir=data_root_dir, data_config_dict=data_config_dict)
     print(data_config)
 
     assert data_config
